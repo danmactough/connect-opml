@@ -1,0 +1,19 @@
+{
+  "name": "connect-opml",
+  "version": "0.0.1",
+  "description": "Connect middleware OPML body parser",
+  "main": "opml.js",
+  "scripts": {
+    "test": "node test/test-01.js"
+  },
+  "repository": "git@github.com:danmactough/connect-opml.git",
+  "author": "Dan MacTough <danmactough@gmail.com>",
+  "license": "MIT",
+  "dependencies": {
+    "opmlparser": "0.4.x",
+    "connect": "2.7.x"
+  },
+  "devDependencies": {
+    "request": "2.12.x"
+  }
+}
