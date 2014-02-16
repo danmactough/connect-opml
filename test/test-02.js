@@ -9,17 +9,7 @@ module.exports = function (done) {
     , opml = require('../')
     , file = __dirname + '/assets/subscriptionList.opml';
 
-  app.use(opml({ filter: function filterFn (outline) {
-    return outline['#type'] === 'feed';  
-  } }))
-     .use(function (req, res) {
-      assert(req.body.meta);
-      assert.equal(req.body.meta.title, 'mySubscriptions.opml');
-      assert(Array.isArray(req.body.outlines));
-      assert.strictEqual(req.body.outlines.length, 13);
-      assert.strictEqual(req.body.outlines[1].title, 'washingtonpost.com - Politics');
-      res.end( JSON.stringify(req.body.outlines) );
-     });
+  app.use(opml({ limit: 1 }))
 
   var server = http.createServer(app).listen();
 
@@ -30,6 +20,8 @@ module.exports = function (done) {
 
   function resp (e, r, body) {
     assert.ifError(e);
+    assert.equal(r.statusCode, 413);
+    assert.ok(body.match(/request entity too large/));
     server.close();
     done();
   }
