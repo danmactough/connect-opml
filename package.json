@@ -1,6 +1,6 @@
 {
   "name": "connect-opml",
-  "version": "0.0.1",
+  "version": "0.0.2",
   "description": "Connect middleware OPML body parser",
   "main": "opml.js",
   "scripts": {
