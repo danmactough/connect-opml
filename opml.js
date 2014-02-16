@@ -12,15 +12,7 @@
 var connect = require('connect')
   , OpmlParser = require('opmlparser')
   , utils = connect.utils
-  , _limit = connect.middleware.limit;
-
-/**
- * noop middleware.
- */
-
-function noop(req, res, next) {
-  next();
-}
+  , bytes = require('bytes');
 
 /**
  * OPML:
@@ -40,11 +32,12 @@ function noop(req, res, next) {
 
 exports = module.exports = function (options) {
   options = options || {};
-  var passthrough = 'passthrough' in options ? options.passthrough : false;
 
-  var limit = options.limit ?
-    _limit(options.limit) :
-    noop;
+  var limit = '1mb';
+  if ('number' === typeof options.limit)
+    limit = options.limit;
+  if ('string' === typeof options.limit)
+    limit = bytes(options.limit);
 
   return function opml (req, res, next) {
     if (req._body) return next();
@@ -58,35 +51,51 @@ exports = module.exports = function (options) {
     // flag as parsed
     req._body = true;
 
-    // parse
-    limit(req, res, function(err){
-      if (err) return next(err);
-      var buf = '';
-      req.setEncoding('utf8');
-      req.on('data', function(chunk){ buf += chunk; });
-      req.on('end', function(){
-        buf = buf.trim();
+    req.body = {
+      meta: {},
+      outlines: []
+    };
 
-        if (0 === buf.length) {
-          return next(400, 'invalid OPML, empty body');
-        }
-
-        if (passthrough) {
-          req.body = buf;
-          return next();
-        }
-        var parser = new OpmlParser();
-        parser.parseString(buf, function (err, meta, feeds, outline) {
-          if (err) return next(err);
-          req.body = {
-            _unparsed: buf,
-            meta: meta,
-            feeds: feeds,
-            outline: outline
-          };
-          next();
-        });
-      });
+    var received = 0
+      , _abort;
+    req.on('data', function checklength (chunk) {
+      received += chunk.length;
+      if (limit && received > limit) {
+        if (typeof req.pause === 'function')
+          req.pause();
+        _abort = true;
+        next(makeError(new Error(), 413, 'request entity too large'));
+      }
     });
+    var opmlparser = new OpmlParser();
+    opmlparser.on('error', next);
+    opmlparser.once('readable', function () {
+      req.body.meta = this.meta;
+    });
+    opmlparser.on('readable', function () {
+      var stream = this, outline;
+      while (outline = stream.read()) {
+        if (!options.filter || 'function' !== typeof options.filter || options.filter(outline)) {
+          req.body.outlines.push(outline);
+        }
+      }
+    });
+    opmlparser.on('end', function () {
+      if (!_abort) {
+        if (0 === received.length) {
+          return next(makeError(new Error(), 400, 'invalid OPML, empty body'));
+        }
+        next();
+      }
+    });
+
+    // parse
+    req.pipe(opmlparser);
   };
 };
+
+function makeError (error, code, message) {
+  error.message = message;
+  error.status = error.statusCode = code;
+  return error;
+}

@@ -10,8 +10,9 @@
   "author": "Dan MacTough <danmactough@gmail.com>",
   "license": "MIT",
   "dependencies": {
-    "opmlparser": "0.4.x",
-    "connect": "2.7.x"
+    "opmlparser": "~0.6",
+    "connect": "2.x",
+    "bytes": "~0.2.1"
   },
   "devDependencies": {
     "request": "2.12.x"
