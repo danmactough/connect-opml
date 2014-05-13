@@ -9,10 +9,9 @@
  * Module dependencies.
  */
 
-var connect = require('connect')
-  , OpmlParser = require('opmlparser')
-  , utils = connect.utils
-  , bytes = require('bytes');
+var OpmlParser = require('opmlparser')
+  , bytes = require('bytes')
+  , typeis = require('type-is');
 
 /**
  * OPML:
@@ -43,10 +42,10 @@ exports = module.exports = function (options) {
     if (req._body) return next();
     req.body = req.body || {};
 
-    if (!utils.hasBody(req)) return next();
+    if (!hasBody(req)) return next();
 
     // check Content-Type
-    if ('text/x-opml' !== utils.mime(req)) return next();
+    if (!typeis(req, ['text/x-opml'])) return next();
 
     // flag as parsed
     req._body = true;
@@ -99,3 +98,12 @@ function makeError (error, code, message) {
   error.status = error.statusCode = code;
   return error;
 }
+
+// utility function copied from Connect
+
+function hasBody(req) {
+  var encoding = 'transfer-encoding' in req.headers,
+      length = 'content-length' in req.headers
+               && req.headers['content-length'] !== '0';
+  return encoding || length;
+};
