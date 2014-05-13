@@ -45,7 +45,7 @@ exports = module.exports = function (options) {
     if (!hasBody(req)) return next();
 
     // check Content-Type
-    if (!typeis(req, ['text/x-opml'])) return next();
+    if (!typeis(req, ['text/x-opml', 'text/xml', 'application/xml'])) return next();
 
     // flag as parsed
     req._body = true;
