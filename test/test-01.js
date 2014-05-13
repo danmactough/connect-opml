@@ -10,7 +10,7 @@ module.exports = function (done) {
     , file = __dirname + '/assets/subscriptionList.opml';
 
   app.use(opml({ filter: function filterFn (outline) {
-    return outline['#type'] === 'feed';  
+    return outline['#type'] === 'feed';
   } }))
      .use(function (req, res) {
       assert(req.body.meta);
