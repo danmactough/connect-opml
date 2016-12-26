@@ -13,14 +13,14 @@
   "author": "Dan MacTough <danmactough@gmail.com>",
   "license": "MIT",
   "dependencies": {
-    "bytes": "~0.2.1",
-    "opmlparser": "~0.6",
-    "type-is": "~1.2.0"
+    "bytes": "~2.4.0",
+    "opmlparser": "~0.8.0",
+    "type-is": "~1.6.14"
   },
   "devDependencies": {
-    "connect": "~2.8.0",
+    "connect": "~3.5.0",
     "request": "2.x",
-    "async": "0.2"
+    "async": "~2.1.4"
   },
   "bugs": {
     "url": "https://github.com/danmactough/connect-opml/issues"
